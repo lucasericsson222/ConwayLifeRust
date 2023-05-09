@@ -52,7 +52,7 @@ fn apply_cell_life(out: &mut Vec<Vec<char>>, source: &Vec<Vec<char>>, i: usize, 
     let num_neighbors = calc_num_neighbors(source, i, j);
     out[i][j] = source[i][j];
     if is_alive {
-        if num_neighbors < 2 || num_neighbors > 3 {
+        if num_neighbors != 2 && num_neighbors != 3 {
             out[i][j] = '.';
         }
     } else {
@@ -64,37 +64,27 @@ fn apply_cell_life(out: &mut Vec<Vec<char>>, source: &Vec<Vec<char>>, i: usize, 
 
 fn calc_num_neighbors(source: &Vec<Vec<char>>, i: usize, j: usize) -> i32 {
     let mut num = 0;
-    if (i == 0 || j == 0 || i >= 20 || j >= 20) {
-        return 0;
-    }
-    if let Some(val) = source.get(i - 1) {
-        if let Some(val) = val.get(j) {
-            if *val == '#' {
-                num += 1;
+    for oi in -1..=1 {
+        for oj in -1..=1 {
+            if oi == 0 && oj == 0 {
+                continue;
             }
-        }
-    }
-    if let Some(val) = source.get(i) {
-        if let Some(val) = val.get(j - 1) {
-            if *val == '#' {
-                num += 1;
-            }
-        }
-    }
-    if let Some(val) = source.get(i) {
-        if let Some(val) = val.get(j + 1) {
-            if *val == '#' {
-                num += 1;
-            }
-        }
-    }
-    if let Some(val) = source.get(i + 1) {
-        if let Some(val) = val.get(j) {
-            if *val == '#' {
-                num += 1;
+            if let Some(val) = get_from_world_safe(&source, i as isize + oi, j as isize + oj) {
+                if *val == '#' {
+                    num += 1;
+                }
             }
         }
     }
     return num; 
 }
 
+fn get_from_world_safe<'a>(world: &'a Vec<Vec<char>>, i: isize, j: isize) -> Option<&'a char> {
+    if i < 0 || i >= 20 {
+        return None;
+    }
+    if j < 0 || j >= 20 {
+        return None;
+    }
+    return world.get(i as usize)?.get(j as usize);
+}
